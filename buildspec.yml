@@ -5,12 +5,12 @@ env:
     ECR_REGION: us-east-1                # US Virginia for ECR
     ECS_REGION: ap-south-1               # Mumbai for ECS
     AWS_ACCOUNT_ID: 209561933103
-    CLUSTER_NAME: vamsi-cluster
-    SERVICE_NAME: vamsi-task-service-zpf2lj8p
-    TASK_DEFINITION_FAMILY: vamsi-task
-    CONTAINER_NAME:  vamsi-repo
-    SUBNET_ID: subnet-01475dd681a52e7b0
-    SECURITY_GROUP_ID: sg-06078bcb565e22595
+    CLUSTER_NAME: food-order-cluster
+    SERVICE_NAME: food-task-definition-service-ykvqq4qc
+    TASK_DEFINITION_FAMILY: food-task-definition
+    CONTAINER_NAME:  food-container
+    SUBNET_ID: subnet-06dc0fd87bfe5a8b6
+    SECURITY_GROUP_ID: sg-029beaf9489126e73
     EXECUTION_ROLE_ARN: arn:aws:iam::209561933103:role/ecsTaskExecutionRole
 
 
@@ -24,7 +24,7 @@ phases:
       - echo Logging in to Amazon ECR Public in $ECR_REGION...
       - aws --version
       - aws ecr-public get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin public.ecr.aws/i5n8n4i7
-      - REPOSITORY_URI=public.ecr.aws/i5n8n4i7/vamsi-repo
+      - REPOSITORY_URI=public.ecr.aws/i5n8n4i7/food-repo
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo IMAGE_TAG=$IMAGE_TAG
 
