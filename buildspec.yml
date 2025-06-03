@@ -2,29 +2,31 @@ version: 0.2
 
 env:
   variables:
-    ECR_REGION: us-east-1                # US Virginia for ECR
-    ECS_REGION: ap-south-1               # Mumbai for ECS
+    ECR_REGION: us-east-1                   # Region where Public ECR is hosted
+    ECS_REGION: ap-south-1                  # ECS cluster region
     AWS_ACCOUNT_ID: 209561933103
     CLUSTER_NAME: food-order-cluster
     SERVICE_NAME: food-task-definition-service-ykvqq4qc
     TASK_DEFINITION_FAMILY: food-task-definition
-    CONTAINER_NAME:  food-container
+    CONTAINER_NAME: food-container
     SUBNET_ID: subnet-06dc0fd87bfe5a8b6
     SECURITY_GROUP_ID: sg-029beaf9489126e73
     EXECUTION_ROLE_ARN: arn:aws:iam::209561933103:role/ecsTaskExecutionRole
-
+    REPOSITORY_NAME: food-repo
 
 phases:
   install:
     commands:
-      - echo Installing build dependencies...
+      - echo Installing dependencies...
 
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR Public in $ECR_REGION...
+      - echo Logging into Amazon Public ECR in $ECR_REGION...
       - aws --version
-      - aws ecr-public get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin public.ecr.aws/i5n8n4i7
-      - REPOSITORY_URI=public.ecr.aws/i5n8n4i7/food-repo
+      - |
+        aws ecr-public get-login-password --region $ECR_REGION | \
+        docker login --username AWS --password-stdin public.ecr.aws/i5n8n4i7
+      - REPOSITORY_URI=public.ecr.aws/i5n8n4i7/$REPOSITORY_NAME
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
       - echo IMAGE_TAG=$IMAGE_TAG
 
@@ -37,15 +39,15 @@ phases:
   post_build:
     commands:
       - echo Build completed on `date`
-      - echo Pushing Docker images to ECR in $ECR_REGION...
+      - echo Pushing Docker images to Public ECR...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - docker push $REPOSITORY_URI:latest
-      - echo Writing image definitions file...
+      - echo Writing imagedefinitions.json...
       - printf '[{"name":"%s","imageUri":"%s"}]' "$CONTAINER_NAME" "$REPOSITORY_URI:$IMAGE_TAG" > imagedefinitions.json
       - cat imagedefinitions.json
 
+      - echo Registering ECS task definition in $ECS_REGION...
       - |
-        echo Registering ECS task definition in $ECS_REGION...
         cat <<EOF > taskdef.json
         {
           "family": "$TASK_DEFINITION_FAMILY",
@@ -71,27 +73,42 @@ phases:
         EOF
 
       - |
-        TASK_DEF_ARN=$(aws ecs register-task-definition --cli-input-json file://taskdef.json --region $ECS_REGION --query 'taskDefinition.taskDefinitionArn' --output text)
+        TASK_DEF_ARN=$(aws ecs register-task-definition \
+          --cli-input-json file://taskdef.json \
+          --region $ECS_REGION \
+          --query 'taskDefinition.taskDefinitionArn' --output text)
         echo Task definition registered: $TASK_DEF_ARN
 
+      - echo Checking ECS cluster existence...
       - |
-        echo Checking if ECS cluster exists in $ECS_REGION...
-        CLUSTER_STATUS=$(aws ecs describe-clusters --clusters $CLUSTER_NAME --region $ECS_REGION --query "clusters[0].status" --output text)
+        CLUSTER_STATUS=$(aws ecs describe-clusters \
+          --clusters $CLUSTER_NAME --region $ECS_REGION \
+          --query "clusters[0].status" --output text || echo "MISSING")
+
         if [ "$CLUSTER_STATUS" != "ACTIVE" ]; then
-          echo "Cluster $CLUSTER_NAME does not exist. Creating cluster..."
+          echo "Cluster doesn't exist. Creating..."
           aws ecs create-cluster --cluster-name $CLUSTER_NAME --region $ECS_REGION
         else
-          echo "Cluster $CLUSTER_NAME already exists. Skipping creation."
+          echo "Cluster exists. Skipping creation."
         fi
 
+      - echo Checking ECS service existence...
       - |
-        echo Checking if ECS service exists in $ECS_REGION...
-        SERVICE_STATUS=$(aws ecs describe-services --cluster $CLUSTER_NAME --services $SERVICE_NAME --region $ECS_REGION --query "services[0].status" --output text)
+        SERVICE_STATUS=$(aws ecs describe-services \
+          --cluster $CLUSTER_NAME \
+          --services $SERVICE_NAME \
+          --region $ECS_REGION \
+          --query "services[0].status" --output text || echo "INACTIVE")
+
         if [ "$SERVICE_STATUS" = "ACTIVE" ]; then
-          echo "Service $SERVICE_NAME exists. Updating service with new task definition..."
-          aws ecs update-service --cluster $CLUSTER_NAME --service $SERVICE_NAME --task-definition $TASK_DEF_ARN --region $ECS_REGION
+          echo "Service exists. Updating..."
+          aws ecs update-service \
+            --cluster $CLUSTER_NAME \
+            --service $SERVICE_NAME \
+            --task-definition $TASK_DEF_ARN \
+            --region $ECS_REGION
         else
-          echo "Service $SERVICE_NAME does not exist. Creating service..."
+          echo "Creating new ECS service..."
           aws ecs create-service \
             --cluster $CLUSTER_NAME \
             --service-name $SERVICE_NAME \
