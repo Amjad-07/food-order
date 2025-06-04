@@ -4,160 +4,149 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Order Food</title>
+  <link rel="stylesheet" href="style.css">
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f4f4;
-      color: #333;
-      padding: 20px;
-    }
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  padding: 20px;
+}
 
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
+/* Container */
+.container {
+  max-width: 600px;
+  margin: auto;
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-      color: #2c3e50;
-    }
+/* Heading */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
 
-    form label {
-      display: block;
-      margin-bottom: 6px;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+/* Form */
+form label {
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    input[type="text"],
-    input[type="number"],
-    input[type="email"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1em;
-    }
+input[type="text"],
+input[type="number"],
+input[type="email"],
+textarea,
+select {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1em;
+}
 
-    input[type="checkbox"],
-    input[type="radio"] {
-      margin-right: 8px;
-      margin-top: 10px;
-    }
+/* Checkboxes and Radio Buttons */
+input[type="checkbox"],
+input[type="radio"] {
+  margin-right: 8px;
+  margin-top: 10px;
+}
 
-    button {
-      width: 100%;
-      background-color: #27ae60;
-      color: white;
-      border: none;
-      padding: 12px;
-      margin-top: 25px;
-      font-size: 1em;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+label[for="addon1"],
+label[for="addon2"],
+label[for="addon3"] {
+  display: inline-block;
+  margin-right: 15px;
+}
 
-    button:hover {
-      background-color: #219150;
-    }
+/* Button */
+button,
+input[type="submit"] {
+  display: block;
+  width: 100%;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px;
+  margin-top: 25px;
+  font-size: 1em;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
 
-    @media (max-width: 600px) {
-      .container {
-        padding: 20px;
-      }
-    }
+button:hover,
+input[type="submit"]:hover {
+  background-color: #219150;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+  }
+}
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🍽️ Place Your Order</h1>
-
-    <form id="orderForm">
-      <label for="name">Customer Name:</label>
-      <input type="text" id="name" required>
-
-      <label for="email">Email:</label>
-      <input type="email" id="email" required>
-
-      <label for="phonenumber">Phone Number:</label>
-      <input type="text" id="phonenumber" required>
-
-      <label for="food">Select Food Item:</label>
-      <select id="food" required>
-        <option value="">-- Choose --</option>
-        <option value="Biryani">Biryani</option>
-        <option value="Pizza">Pizza</option>
-        <option value="Dosa">Dosa</option>
-        <option value="Burger">Burger</option>
-      </select>
-
-      <label>Add-ons:</label>
-      <input type="checkbox" name="addons" value="Extra Cheese"> Extra Cheese<br>
-      <input type="checkbox" name="addons" value="Spicy"> Spicy<br>
-      <input type="checkbox" name="addons" value="Soft Drink"> Soft Drink<br>
-
-      <label>Payment Method:</label>
-      <input type="radio" name="payment" value="Cash on Delivery" required> Cash on Delivery<br>
-
-      <label for="address">Delivery Address:</label>
-      <textarea id="address" rows="3" required></textarea>
-
-      <label for="comments">Special Instructions:</label>
-      <input type="text" id="comments">
-
-      <button type="submit">Submit Order</button>
-    </form>
+  <div class="top-bar">
+    <div class="container">
+      🍽️ Food Delivery - Place Your Order
+    </div>
   </div>
 
-  <script>
-    document.getElementById("orderForm").addEventListener("submit", function (event) {
-      event.preventDefault(); // prevent default form post
+  <a href="/get-data" class="btn">View All Orders</a>
+  <h1>Place Your Order</h1>
 
-      const addons = [];
-      document.querySelectorAll('input[name="addons"]:checked').forEach(cb => addons.push(cb.value));
+  <form action="/submit" method="post">
+    <label for="name">Customer Name:</label><br>
+    <input type="text" id="name" name="name" required><br><br>
 
-      const data = {
-        name: document.getElementById("name").value,
-        email: document.getElementById("email").value,
-        phonenumber: document.getElementById("phonenumber").value,
-        food: document.getElementById("food").value,
-        payment: document.querySelector('input[name="payment"]:checked')?.value,
-        address: document.getElementById("address").value,
-        comments: document.getElementById("comments").value,
-        addons: addons
-      };
+    <label for="email">Email:</label><br>
+    <input type="email" id="email" name="email" required><br><br>
 
-      fetch("http://internal-food-internal-1544954247.ap-south-1.elb.amazonaws.com:8080/submit", {
-        method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
-      })
-        .then(res => {
-          if (!res.ok) throw new Error(Server error: ${res.status});
-          return res.json();
-        })
-        .then(data => {
-          alert("Order placed successfully!");
-          document.getElementById("orderForm").reset();
-        })
-        .catch(err => {
-          alert("Failed to submit order: " + err.message);
-        });
-    });
-  </script>
+    <label for="phonenumber">Phone Number:</label><br>
+    <input type="text" id="phonenumber" name="phonenumber" required><br><br>
+
+    <label for="food">Select Food Item:</label><br>
+    <select id="food" name="food" required>
+      <option value="">-- Choose --</option>
+      <option value="Biryani">Biryani</option>
+      <option value="Pizza">Pizza</option>
+      <option value="Dosa">Dosa</option>
+      <option value="Burger">Burger</option>
+    </select><br><br>
+
+    <label>Add-ons:</label><br>
+    <input type="checkbox" name="addons" value="Extra Cheese"> Extra Cheese<br>
+    <input type="checkbox" name="addons" value="Spicy"> Spicy<br>
+    <input type="checkbox" name="addons" value="Soft Drink"> Soft Drink<br><br>
+
+    <label for="payment">Payment Method:</label><br>
+    <input type="radio" name="payment" value="Cash on Delivery" required> Cash on Delivery<br>
+    <input type="radio" name="payment" value="Online Payment" disabled> Online Payment (Coming Soon)<br><br>
+
+    <label for="address">Delivery Address:</label><br>
+    <textarea id="address" name="address" rows="3" required></textarea><br><br>
+
+    <label for="comments">Special Instructions:</label><br>
+    <input type="text" id="comments" name="comments"><br><br>
+
+    <input type="submit" value="Submit Order">
+  </form>
 </body>
 </html>
+
+
