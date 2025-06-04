@@ -11,7 +11,7 @@ def index():
     return send_file('index.html')
 
 # Submit proxy
-@app.route('/submit', methods=['POST'])
+@app.route('/', methods=['POST'])
 def proxy_submit():
     form_data = request.form.to_dict(flat=True)
     form_data['addons'] = request.form.getlist("addons")
