@@ -4,7 +4,7 @@ import requests
 app = Flask(__name__)
 
 # 🔁 Backend API behind internal load balancer
-BACKEND_URL = "http://internal-instance-ll-rr-1942256296.ap-south-1.elb.amazonaws.com:8080"
+BACKEND_URL = "http://internal-food-internal-1544954247.ap-south-1.elb.amazonaws.com:8080"
 
 @app.route('/')
 def index():
