@@ -7,7 +7,7 @@ env:
     AWS_ACCOUNT_ID: 209561933103
     REPOSITORY_NAME: food-repo           # Your public ECR repo name
     CLUSTER_NAME: food-order-cluster
-    SERVICE_NAME: food-task-definition-service-ykvqq4qc
+    SERVICE_NAME: food-task-definition-service-36gfe5a2
     TASK_DEFINITION_FAMILY: food-task-definition
     CONTAINER_NAME: food-container
     SUBNET_ID: subnet-06dc0fd87bfe5a8b6
